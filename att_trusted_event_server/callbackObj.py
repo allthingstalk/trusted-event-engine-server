@@ -43,7 +43,6 @@ class CallbackObj(object):
             if topicParts[-1] != 'timer':
                 value = json.loads(body)
                 asset = value['Id']
-                value = value['Value']
                 resources.valueStore[asset] = value
                 resources.trigger = resources.Asset(asset)                      # we use the default connection here, which is the
             elif hasattr(self, 'timer'):
