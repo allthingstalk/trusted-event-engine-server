@@ -41,3 +41,10 @@ class IotApplication:
         Must be called when all the rules are loaded.
         """
         broker.process()
+
+    def stop(self):
+        """
+        stops the broker.
+        :return: None
+        """
+        broker.stop()
