@@ -24,7 +24,7 @@ def _registerAssetToMonitor(asset, callbackObj):
         monitor.direction = 'in'
         if isinstance(asset, Timer):
             monitor.level = 'timer'
-            monitor.timer = asset  # keep a refernce to the timer inside the callback, so we know which one went off.
+            callbackObj.timer = asset  # keep a refernce to the timer inside the callback, so we know which one went off.
         topicStr = monitor.getTopic(divider='.', wildcard='*')
         broker.subscribeTo(topicStr, callbackObj)
 
