@@ -24,7 +24,7 @@ def connect(username, pwd, brokerName):
     """connect to the broker"""
     global channel, _parameters
     try:
-        _parameters = pika.URLParameters("amqps://{}:{}@{}/space-maker-vhost?heartbeat_interval=30".format(username, pwd, brokerName))
+        _parameters = pika.URLParameters("amqps://{}:{}@{}/space-maker-vhost?heartbeat_interval=30&socket_timeout=1".format(username, pwd, brokerName))
         connection = pika.BlockingConnection(_parameters)
         channel = connection.channel()
         return True
@@ -79,6 +79,7 @@ def run():
                 if len(_subscriptions) > 0:  # don't start conuming when there are no subscriptions, this doesn't work
                     channel.start_consuming()
                 else:
+                    channel.connection.process_data_events()    # make certain that hearbeat is processed
                     sleep(2)                    # no need to loop continuosly if there are no subscriptions, give the cpu some rest until we have something to monitor.
         except:
             logger.exception("broker communication failure")
@@ -132,7 +133,7 @@ def sendValue(value, topic, exchange='outbound'):
     retryCount = 0
     while not sent and retryCount < 10:
         try:
-            channel.basic_publish(exchange=exchange, routing_key=topic, body=str(value))
+            channel.publish(exchange=exchange, routing_key=topic, body=str(value))
             sent = True
         except:
             if retryCount < 10:
