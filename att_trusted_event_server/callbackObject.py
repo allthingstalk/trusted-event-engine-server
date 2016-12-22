@@ -17,7 +17,7 @@ _memStore = redis.StrictRedis(host=settings.redisHost, port=settings.redisPort, 
 
 AppName = ""
 
-class CallbackObj(object):
+class CallbackObject(object):
     """contains the references to all the code objects that have subsribed for the same topic"""
 
     def __init__(self, condition, callback):
@@ -48,9 +48,9 @@ class CallbackObj(object):
                 resources.valueStore[asset] = value
                 resources.trigger = resources.Asset(asset)                      # we use the default connection here, which is the
             elif hasattr(self, 'timer'):
-                context = resources.buildFromTopic(topicParts[:-2])             # remove the last 2 items from the topic: timer and timer name
-                timer = Timer(context, topicParts[-1])
-                resources.trigger = timer
+                #context = resources.buildFromTopic(topicParts[:-2])             # remove the last 2 items from the topic: timer and timer name
+                #timer = Timer(context, topicParts[-1])
+                resources.trigger = self.timer
             else:
                 resources.trigger = None
 

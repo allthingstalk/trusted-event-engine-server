@@ -13,7 +13,7 @@ sys.modules['att_event_engine.when_platform'] = __import__('att_trusted_event_se
 import att_event_engine.when_platform
 
 import broker
-import callbackObj
+import callbackObject
 import client
 import att_event_engine.resources as resources
 
@@ -29,11 +29,13 @@ class IotApplication:
         :param appName: the name of the application. Used to store temp values in redis.
         """
 
-        broker.connect(username, pwd, brokerName)
+        is_connected = broker.connect(username, pwd, brokerName)
+        while not is_connected:                         #no point in trying to go any further if we can't connect here.
+            is_connected = broker.reconnect()
         self.api = api
         self.att = client.Client()
         resources.defaultconnection = self.att
-        callbackObj.AppName = appName
+        callbackObject.AppName = appName
 
 
     def run(self):

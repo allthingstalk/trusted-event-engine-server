@@ -12,11 +12,20 @@ logger = logging.getLogger('when')
 
 from att_event_engine.timer import Timer
 import att_event_engine.att as att
-from callbackObj import CallbackObj
+from callbackObject import CallbackObject
 import broker
 
 
-def _registerAssetToMonitor(asset, callbackObj):
+def registerAssetToMonitor(asset, callbackObj):
+    """
+        registers an asset to be monitored. The callback object that contains the actual callback will be called when a message
+        arrives for the asset.
+        Use this function to register class methods.
+        :param asset: An asset object (sensor/actuator/virtual/config)
+        :param callbackObj: a previously created callback object
+        :type callbackObj: CallbackObject
+        :return: None
+        """
     topics = asset.getTopics()
     for topic in topics:
         monitor = att.SubscriberData(asset.connection)
@@ -26,7 +35,7 @@ def _registerAssetToMonitor(asset, callbackObj):
             monitor.level = 'timer'
             callbackObj.timer = asset  # keep a refernce to the timer inside the callback, so we know which one went off.
         topicStr = monitor.getTopic(divider='.', wildcard='*')
-        broker.subscribeTo(topicStr, callbackObj)
+        broker.subscribeTo(topicStr, callbackObj.callback)
 
 
 def registerMonitor(assets, condition, callback):
@@ -38,10 +47,10 @@ def registerMonitor(assets, condition, callback):
     if hasattr(callback, '_callbackObj'):
         callbackObj = callback._callbackObj
     else:
-        callbackObj = CallbackObj(condition, callback)
+        callbackObj = CallbackObject(condition, callback)
         callback._callbackObj = callbackObj
     for asset in assets:
-        _registerAssetToMonitor(asset, callbackObj)
+        registerAssetToMonitor(asset, callbackObj)
 
 
 def appendToMonitorList(callback, toMonitor):
@@ -51,8 +60,10 @@ def appendToMonitorList(callback, toMonitor):
     :param toMonitor: a resource to monitor (asset, device, gateway, timer)
     :return: None
     """
-    callbackObj = callback._callbackObj
-    _registerAssetToMonitor(toMonitor, callbackObj)
+    callbackObj = callback._callbackObj         # important: the callback object has a different callback function handler then the actual function, which performs some extra checks.
+    registerAssetToMonitor(toMonitor, callbackObj)
+
+
 
 def removeFromMonitorList(callback, toRemove):
     """
